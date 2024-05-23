@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:push_app_notification/config/constants/environment.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/config/theme/app_theme.dart';
+import 'package:push_app_notification/features/auth/providers/auth_provider.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 
 void main() async {
@@ -24,14 +25,13 @@ class MainApp extends ConsumerStatefulWidget {
 
 class MainAppState extends ConsumerState<MainApp> {
   //! agregar si se quiere sesion con limpieza de token
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   Future.microtask(() {
-  //     ref.read(authProvider.notifier).logOut();
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(authProvider.notifier).logOut();
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
