@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:push_app_notification/features/auth/screens/login_screen.dart';
+import 'package:push_app_notification/features/auth/screens/login_register_screen.dart';
 import 'package:push_app_notification/features/auth/services/auth_service.dart';
 import 'package:push_app_notification/features/home/screens/chat_priv_screen.dart';
-import 'package:push_app_notification/features/home/screens/notification_details_screen.dart';
 import 'package:push_app_notification/features/home/screens/user_screen.dart';
 
 Future<String?> externalRedirect(
@@ -60,7 +59,9 @@ final appRouter =
     pageBuilder: (context, state) {
       return CustomTransitionPage(
         key: state.pageKey,
-        child: const LoginScreen(),
+        child: const LoginRegisterScreen(
+          index: 0,
+        ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return transition(
               animation: animation, context: context, child: child);
@@ -68,6 +69,21 @@ final appRouter =
       );
     },
     redirect: externalRedirect,
+  ),
+  GoRoute(
+    path: '/register',
+    pageBuilder: (context, state) {
+      return CustomTransitionPage(
+        key: state.pageKey,
+        child: const LoginRegisterScreen(
+          index: 1,
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return transition(
+              animation: animation, context: context, child: child);
+        },
+      );
+    },
   ),
   GoRoute(
     path: '/home',
@@ -92,21 +108,6 @@ final appRouter =
         key: state.pageKey,
         child: const UserScreen(
           index: 1,
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return transition(
-              animation: animation, context: context, child: child);
-        },
-      );
-    },
-  ),
-  GoRoute(
-    path: '/push-details/:messageId',
-    pageBuilder: (context, state) {
-      return CustomTransitionPage(
-        key: state.pageKey,
-        child: NotificationDetailsScreen(
-          pushMessageId: state.pathParameters['messageId'] ?? '',
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return transition(

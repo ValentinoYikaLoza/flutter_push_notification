@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:push_app_notification/config/constants/storage_keys.dart';
+
 import 'package:push_app_notification/config/router/app_router.dart';
-import 'package:push_app_notification/features/auth/models/login_response.dart';
-import 'package:push_app_notification/features/auth/providers/auth_provider.dart';
 import 'package:push_app_notification/features/auth/services/auth_service.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/snackbar_service.dart';
-import 'package:push_app_notification/features/shared/services/storage_service.dart';
 import 'package:push_app_notification/features/shared/widgets/form_wydnex.dart';
 
-final loginProvider = StateNotifierProvider<LoginNotifier, LoginState>((ref) {
-  return LoginNotifier(ref);
+final registerProvider = StateNotifierProvider<RegisterNotifier, RegisterState>((ref) {
+  return RegisterNotifier(ref);
 });
 
-class LoginNotifier extends StateNotifier<LoginState> {
-  LoginNotifier(this.ref)
+class RegisterNotifier extends StateNotifier<RegisterState> {
+  RegisterNotifier(this.ref)
       : super(
-          LoginState(
+          RegisterState(
             user: FormWydnex<String>(
               value: '',
               validators: [
@@ -33,7 +30,15 @@ class LoginNotifier extends StateNotifier<LoginState> {
               value: '',
               validators: [
                 const ValidatorWydnex(ValidatorsWydnex.required),
-                const ValidatorWydnex(ValidatorsWydnex.maxLength, value: 10),
+              ],
+              formatters: [
+                LengthLimitingTextInputFormatter(10),
+              ],
+            ),
+            repeatedPassword: FormWydnex<String>(
+              value: '',
+              validators: [
+                const ValidatorWydnex(ValidatorsWydnex.required),
               ],
               formatters: [
                 LengthLimitingTextInputFormatter(10),
@@ -43,58 +48,33 @@ class LoginNotifier extends StateNotifier<LoginState> {
         );
   final StateNotifierProviderRef ref;
 
-  initData() async {
-    final user = await StorageService.get<String>(StorageKeys.username);
-    if (user == null) return;
-
-    final rememberMe =
-        await StorageService.get<bool>(StorageKeys.rememberMe) ?? false;
-
-    state = state.copyWith(
-      user: rememberMe
-          ? FormWydnex(value: user)
-          : const FormWydnex(value: ''),
-      password: const FormWydnex(value: ''),
-      rememberMe: rememberMe,
-    );
-  }
-
-  login() async {
+  register() async {
     FocusManager.instance.primaryFocus
         ?.unfocus(); //hacer que el teclado se quite
 
     final user = FormWydnex(value: state.user.value);
     final password = FormWydnex(value: state.password.value);
+    final repeatedPassword = FormWydnex(value: state.repeatedPassword.value);
+    
     state = state.copyWith(
       user: user,
       password: password,
+      repeatedPassword: repeatedPassword
     );
 
     if (!state.isFormValid) return;
+    if (state.password.value != state.repeatedPassword.value) return;
 
     try {
-      final LoginResponse loginResponse = await AuthService.login(
+      await AuthService.register(
         user: state.user.value,
         password: state.password.value,
       );
-      await StorageService.set<String>(
-          StorageKeys.userToken, loginResponse.token);
 
-      ref.read(authProvider.notifier).getUser();
-      await ref.read(authProvider.notifier).getDevice();
-      
-      setRemember();
-
-      ref.read(authProvider.notifier).initAutoLogout();
-
-      appRouter.go('/home');
+      appRouter.go('/login');
     } on ServiceException catch (e) {
       SnackbarService.showSnackbar(message: e.message);
     }
-  }
-
-  setRemember() async {
-    await StorageService.set<bool>(StorageKeys.rememberMe, state.rememberMe);
   }
 
   changeUser(FormWydnex<String> user) {
@@ -109,39 +89,40 @@ class LoginNotifier extends StateNotifier<LoginState> {
     );
   }
 
-  toggleRememberMe() {
+  changeRepeatedPassword(FormWydnex<String> repeatedPassword) {
     state = state.copyWith(
-      rememberMe: !state.rememberMe,
+      repeatedPassword: repeatedPassword,
     );
   }
 }
 
-class LoginState {
+class RegisterState {
   final FormWydnex<String> user;
   final FormWydnex<String> password;
+  final FormWydnex<String> repeatedPassword;
   final bool loading;
-  final bool rememberMe;
   bool get isFormValid {
-    return user.isValid && password.isValid;
+    return user.isValid && password.isValid && repeatedPassword.isValid;
   }
 
-  LoginState({
+  RegisterState({
     required this.user,
     required this.password,
+    required this.repeatedPassword,
     this.loading = false,
-    this.rememberMe = false,
   });
 
-  LoginState copyWith({
+  RegisterState copyWith({
     FormWydnex<String>? user,
     FormWydnex<String>? password,
+    FormWydnex<String>? repeatedPassword,
     bool? loading,
-    bool? rememberMe,
-  }) =>
-      LoginState(
-        user: user ?? this.user,
-        password: password ?? this.password,
-        loading: loading ?? this.loading,
-        rememberMe: rememberMe ?? this.rememberMe,
-      );
+  }) {
+    return RegisterState(
+      user: user ?? this.user,
+      password: password ?? this.password,
+      repeatedPassword: repeatedPassword ?? this.repeatedPassword,
+      loading: loading ?? this.loading,
+    );
+  }
 }

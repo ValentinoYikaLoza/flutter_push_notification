@@ -2,9 +2,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:push_app_notification/config/constants/environment.dart';
+import 'package:push_app_notification/config/local_notifications/local_notifications.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/config/theme/app_theme.dart';
-import 'package:push_app_notification/features/auth/providers/auth_provider.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 
 void main() async {
@@ -12,6 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await NotificationsNotifier.initializeFCM();
+  await LocalNotifications.initializeLocalNotifications();
 
   runApp(const ProviderScope(child: MainApp()));
 }
@@ -25,13 +26,13 @@ class MainApp extends ConsumerStatefulWidget {
 
 class MainAppState extends ConsumerState<MainApp> {
   //! agregar si se quiere sesion con limpieza de token
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      ref.read(authProvider.notifier).logOut();
-    });
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Future.microtask(() {
+  //     ref.read(authProvider.notifier).logOut();
+  //   });
+  // }
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -55,6 +56,7 @@ class HandleNotificationInteractions extends ConsumerStatefulWidget {
 
 class HandleNotificationInteractionsState
     extends ConsumerState<HandleNotificationInteractions> {
+      
   Future<void> setupInteractedMessage() async {
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
@@ -64,22 +66,8 @@ class HandleNotificationInteractionsState
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
   }
 
-  void _handleMessage(RemoteMessage message) {
+  void _handleMessage(RemoteMessage message) async {
     ref.read(notificationsProvider.notifier).handleRemoteMessage(message);
-    if (message.data.isNotEmpty) {
-      if (message.data['go'] == '10') {
-        if (message.notification!.title != '') {
-          appRouter.push('/chat-priv/${message.notification!.title}');
-        } else {
-          appRouter.push('/chat');
-        }
-      }
-      if (message.data['go'] == '11') {
-        appRouter.push('/fotos');
-      }
-    } else {
-      appRouter.push('/notification');
-    }
   }
 
   @override

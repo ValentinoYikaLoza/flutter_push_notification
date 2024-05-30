@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 
-class CustomBottomBar extends StatelessWidget {
+class CustomUserBottomBar extends StatelessWidget {
   final int currentIndex;
-  const CustomBottomBar({
+  const CustomUserBottomBar({
     super.key,
     required this.currentIndex,
   });

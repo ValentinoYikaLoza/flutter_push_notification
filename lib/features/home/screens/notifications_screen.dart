@@ -1,34 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:push_app_notification/features/home/models/push_message.dart';
-import 'package:push_app_notification/features/home/providers/handle_notification_provider.dart';
+import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 
-class NotificationScreen extends ConsumerStatefulWidget {
+class NotificationScreen extends ConsumerWidget {
   const NotificationScreen({
     super.key,
   });
 
   @override
-  NotificationScreenState createState() => NotificationScreenState();
-}
-
-class NotificationScreenState extends ConsumerState<NotificationScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      setState(() {
-        ref.read(handleNotificationProvider.notifier).getNotifications();
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final savedNotifications = ref.watch(handleNotificationProvider);
-    final List<PushMessage> notifications =
-        savedNotifications.savedNotifications;
+  Widget build(BuildContext context, ref) {
+    final notifications = ref.watch(notificationsProvider);
     return Column(
       children: [
         const Text(
@@ -38,26 +20,25 @@ class NotificationScreenState extends ConsumerState<NotificationScreen> {
         const SizedBox(height: 10),
         Expanded(
           child: ListView.builder(
-            itemCount: notifications.length,
+            itemCount: notifications.notifications.length,
             itemBuilder: (BuildContext context, int index) {
-              final notification = notifications[index];
+              final notification = notifications.notifications[index];
               return ListTile(
                 title: Text(notification.title),
                 subtitle: Text(notification.body),
-                leading:
-                    notification.imageUrl != null && notification.imageUrl != ''
-                        ? Image.network(notification.imageUrl!)
-                        : Image.asset('assets/imgs/image.png'),
+                leading: notification.imageUrl != null
+                    ? Image.network(notification.imageUrl!)
+                    : Image.asset('assets/imgs/image.png'),
                 onTap: () {
-                  if (notification.data.isNotEmpty) {
-                    if (notification.data['go'] == '10') {
+                  if (notification.data != null) {
+                    if (notification.data!['go'] == '10') {
                       if (notification.title != '') {
                         context.push('/chat-priv/${notification.title}');
-                      }else{
+                      } else {
                         context.push('/chat');
                       }
                     }
-                    if (notification.data['go'] == '11') {
+                    if (notification.data!['go'] == '11') {
                       context.push('/fotos');
                     }
                   } else {

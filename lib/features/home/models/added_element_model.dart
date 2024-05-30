@@ -1,14 +1,14 @@
-class SavedNotificationResponse {
+class AddedElementResponse {
   final int status;
   final String message;
   
-  SavedNotificationResponse({
+  AddedElementResponse({
     required this.status,
     required this.message,
   });
 
-  factory SavedNotificationResponse.fromJson(Map<String, dynamic> json) =>
-      SavedNotificationResponse(
+  factory AddedElementResponse.fromJson(Map<String, dynamic> json) =>
+      AddedElementResponse(
         status: json["status"],
         message: json["message"],
       );

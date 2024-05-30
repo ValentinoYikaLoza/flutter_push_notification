@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/features/auth/providers/auth_provider.dart';
-import 'package:push_app_notification/features/auth/providers/login_provider.dart';
-import 'package:push_app_notification/features/home/providers/get_api_key_provider.dart';
+import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 import 'package:push_app_notification/features/home/screens/album_photos_screen.dart';
 import 'package:push_app_notification/features/home/screens/chat_screen.dart';
 import 'package:push_app_notification/features/home/screens/home_screen.dart';
 import 'package:push_app_notification/features/home/screens/notifications_screen.dart';
-import 'package:push_app_notification/features/shared/widgets/custom_bottom_bar.dart';
+import 'package:push_app_notification/features/shared/widgets/custom_user_bottom_bar.dart';
 
 class UserScreen extends ConsumerStatefulWidget {
   final int index;
@@ -28,11 +27,11 @@ class UserScreenState extends ConsumerState<UserScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      setState(() {
-        ref.read(getApiKeyProvider.notifier).getApiKey();
-      });
-    });
+    Future.microtask(() {setState(() {
+      ref.read(notificationsProvider.notifier).getNotifications();
+      ref.read(authProvider.notifier).getUser();
+      ref.read(authProvider.notifier).getDevice();
+    });});
     _selectedIndex = widget.index;
     _pageController = PageController(initialPage: _selectedIndex);
   }
@@ -65,10 +64,10 @@ class UserScreenState extends ConsumerState<UserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final login = ref.watch(loginProvider);
+    final user = ref.watch(authProvider);
     return Scaffold(
         appBar: AppBar(
-          title: Center(child: Text(login.user.value)),
+          title: Center(child: Text(user.user?.username.toString() ?? 'Error')),
           leading: const Padding(
             padding: EdgeInsets.only(left: 10),
             child: Image(
@@ -96,7 +95,7 @@ class UserScreenState extends ConsumerState<UserScreen> {
             PhotoAlbumScreen(),
           ],
         ),
-        bottomNavigationBar: CustomBottomBar(
+        bottomNavigationBar: CustomUserBottomBar(
           currentIndex: _selectedIndex,
         ));
   }

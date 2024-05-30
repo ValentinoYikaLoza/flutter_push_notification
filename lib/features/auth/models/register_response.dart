@@ -1,23 +1,19 @@
-class LoginResponse {
+class RegisterResponse {
     final int status;
     final String message;
-    final String token;
 
-    LoginResponse({
+    RegisterResponse({
         required this.status,
         required this.message,
-        required this.token,
     });
 
-    factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
+    factory RegisterResponse.fromJson(Map<String, dynamic> json) => RegisterResponse(
         status: json["status"],
         message: json["message"],
-        token: json["token"],
     );
 
     Map<String, dynamic> toJson() => {
         "status": status,
         "message": message,
-        "token": token,
     };
 }

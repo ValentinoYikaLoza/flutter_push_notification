@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/features/auth/providers/login_provider.dart';
 import 'package:push_app_notification/features/auth/widgets/password_input.dart';
 import 'package:push_app_notification/features/shared/widgets/checkbox.dart';
@@ -11,9 +13,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: LoginView()
-    );
+    return const Scaffold(body: LoginView());
   }
 }
 
@@ -27,7 +27,6 @@ class LoginView extends ConsumerStatefulWidget {
 }
 
 class LoginViewState extends ConsumerState<LoginView> {
-
   @override
   void initState() {
     super.initState();
@@ -40,18 +39,28 @@ class LoginViewState extends ConsumerState<LoginView> {
   Widget build(BuildContext context) {
     final loginState = ref.watch(loginProvider);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 50),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(20)),
-            child: Image.asset('assets/imgs/image.png', fit: BoxFit.cover)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              'INICIO DE SESION',
+              style: TextStyle(
+                  color: Colors.black.withOpacity(0.6),
+                  fontSize: 25,
+                  fontWeight: FontWeight.w500),
+            ),
           ),
-
+          SizedBox(
+            height: 150,
+            child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+                child: Image.asset('assets/imgs/image.png', fit: BoxFit.cover)),
+          ),
           const SizedBox(height: 30),
-
           InputWydnex(
             label: 'Usuario',
             value: loginState.user,
@@ -60,9 +69,7 @@ class LoginViewState extends ConsumerState<LoginView> {
               ref.read(loginProvider.notifier).changeUser(value);
             },
           ),
-
           const SizedBox(height: 30),
-
           PasswordInput(
             label: 'Contraseña',
             value: loginState.password,
@@ -70,9 +77,7 @@ class LoginViewState extends ConsumerState<LoginView> {
               ref.read(loginProvider.notifier).changePassword(value);
             },
           ),
-          
           const SizedBox(height: 10),
-
           CustomCheckbox(
             value: loginState.rememberMe,
             onChanged: (value) {
@@ -80,9 +85,7 @@ class LoginViewState extends ConsumerState<LoginView> {
             },
             label: 'Recuerdame',
           ),
-
           const SizedBox(height: 10),
-
           SizedBox(
             width: double.infinity,
             height: 60,
@@ -91,11 +94,42 @@ class LoginViewState extends ConsumerState<LoginView> {
               textColor: Colors.white,
               borderRadius: BorderRadius.circular(20),
               child: const Text('Ingresar'),
-              onPressed: (){
+              onPressed: () {
                 ref.read(loginProvider.notifier).login();
-              }
-            )
+              },
+            ),
           ),
+          const SizedBox(height: 10),
+          //aqui irá el login por google
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '¿No tiengo cuenta? ',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black.withOpacity(0.5),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    appRouter.go('/register');
+                  });
+                },
+                child: const Text(
+                  'Registrarme',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );

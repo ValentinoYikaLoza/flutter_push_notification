@@ -3,12 +3,12 @@ import 'package:push_app_notification/config/constants/storage_keys.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
 
-class ApiAuth {
-  final Dio _dioBase = Dio(BaseOptions(baseUrl: 'https://9375-190-237-20-41.ngrok-free.app'));
+class Api {
+  final Dio _dioBase = Dio(BaseOptions(baseUrl: 'https://f0a1-190-237-17-60.ngrok-free.app/api/'));
 
   InterceptorsWrapper interceptor = InterceptorsWrapper();
 
-  ApiAuth() {
+  Api() {
     interceptor = InterceptorsWrapper(
       onRequest: (options, handler) async {
         try {
@@ -17,10 +17,11 @@ class ApiAuth {
             throw ServiceException('API key is null');
           }
           options.headers['Authorization'] = 'Bearer $userToken';
+          options.headers['Accept'] = 'aplication/json';
+          // print('> Api correct $userToken');
           // print('> Request to: ${options.uri}');
           // print('> Headers: ${options.headers}');
           handler.next(options);
-          print('> Api correct $userToken');
         } catch (e) {
           print('> Error in interceptor: $e');
           handler.reject(DioException(

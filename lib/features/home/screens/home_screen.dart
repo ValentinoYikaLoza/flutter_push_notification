@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
-// import 'package:push_app_notification/features/home/providers/handle_notification_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({
@@ -29,17 +28,10 @@ class HomeScreen extends ConsumerWidget {
                     ref
                         .read(notificationsProvider.notifier)
                         .requestPermission();
-                    ref.read(notificationsProvider.notifier).getFCMToken();
                   },
                   icon: const Icon(Icons.settings)),
             ],
           ),
-          // ElevatedButton(
-          //   onPressed: () {
-          //     ref.read(handleNotificationProvider.notifier).sendNotification();
-          //   },
-          //   child: const Text('Enviar notificacion'),
-          // )
         ],
       ),
     );

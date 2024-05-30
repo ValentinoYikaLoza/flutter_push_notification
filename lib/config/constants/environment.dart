@@ -5,5 +5,5 @@ class Environment {
     await dotenv.load(fileName: ".env");
   }
 
-  static String urlFMC = dotenv.env['URL_FMC'] ?? 'No URL_FMC';
+  static String urlBASE = dotenv.env['URL_BASE'] ?? 'No URL_BASE';
 }
