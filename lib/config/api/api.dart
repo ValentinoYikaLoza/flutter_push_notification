@@ -4,7 +4,7 @@ import 'package:push_app_notification/features/shared/services/service_exception
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
 
 class Api {
-  final Dio _dioBase = Dio(BaseOptions(baseUrl: 'https://f0a1-190-237-17-60.ngrok-free.app/api/'));
+  final Dio _dioBase = Dio(BaseOptions(baseUrl: 'https://feed-190-237-17-15.ngrok-free.app/api/'));
 
   InterceptorsWrapper interceptor = InterceptorsWrapper();
 

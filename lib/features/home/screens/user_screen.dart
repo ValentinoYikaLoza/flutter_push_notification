@@ -27,11 +27,13 @@ class UserScreenState extends ConsumerState<UserScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {setState(() {
-      ref.read(notificationsProvider.notifier).getNotifications();
-      ref.read(authProvider.notifier).getUser();
-      ref.read(authProvider.notifier).getDevice();
-    });});
+    Future.microtask(() {
+      setState(() {
+        ref.read(authProvider.notifier).getUser();
+        ref.read(authProvider.notifier).getDevice();
+        ref.read(notificationsProvider.notifier).getNotifications();
+      });
+    });
     _selectedIndex = widget.index;
     _pageController = PageController(initialPage: _selectedIndex);
   }
@@ -56,6 +58,22 @@ class UserScreenState extends ConsumerState<UserScreen> {
     }
   }
 
+  String nameFormatter(String? entrada) {
+    if (entrada == null || entrada.isEmpty) {
+      return "";
+    }
+
+    final RegExp emailRegex = RegExp(
+        r"""^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$""");
+
+    if (emailRegex.hasMatch(entrada)) {
+      final name = entrada.split('@');
+      return name[0];
+    } else {
+      return entrada; // Devuelve el valor original
+    }
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -65,9 +83,12 @@ class UserScreenState extends ConsumerState<UserScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider);
+
+    final String username = nameFormatter(user.user?.username.toString());
+    
     return Scaffold(
         appBar: AppBar(
-          title: Center(child: Text(user.user?.username.toString() ?? 'Error')),
+          title: Center(child: Text(username)),
           leading: const Padding(
             padding: EdgeInsets.only(left: 10),
             child: Image(

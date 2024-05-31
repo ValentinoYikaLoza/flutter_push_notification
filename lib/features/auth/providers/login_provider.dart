@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:push_app_notification/config/constants/storage_keys.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/features/auth/models/login_response.dart';
 import 'package:push_app_notification/features/auth/providers/auth_provider.dart';
 import 'package:push_app_notification/features/auth/services/auth_service.dart';
+import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/snackbar_service.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
@@ -51,9 +53,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
         await StorageService.get<bool>(StorageKeys.rememberMe) ?? false;
 
     state = state.copyWith(
-      user: rememberMe
-          ? FormWydnex(value: user)
-          : const FormWydnex(value: ''),
+      user: rememberMe ? FormWydnex(value: user) : const FormWydnex(value: ''),
       password: const FormWydnex(value: ''),
       rememberMe: rememberMe,
     );
@@ -74,7 +74,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
     try {
       final LoginResponse loginResponse = await AuthService.login(
-        user: state.user.value,
+        user: state.user.value.toLowerCase(),
         password: state.password.value,
       );
       await StorageService.set<String>(
@@ -82,7 +82,39 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
       ref.read(authProvider.notifier).getUser();
       await ref.read(authProvider.notifier).getDevice();
-      
+      ref.read(notificationsProvider.notifier).getNotifications();
+
+      setRemember();
+
+      ref.read(authProvider.notifier).initAutoLogout();
+
+      appRouter.go('/home');
+    } on ServiceException catch (e) {
+      SnackbarService.showSnackbar(message: e.message);
+    }
+  }
+
+  signInWithGoogle() async {
+    // Cerrar sesión antes de iniciar sesión nuevamente
+    await GoogleSignIn().signOut();
+
+    GoogleSignInAccount? googleUsers = await GoogleSignIn().signIn();
+
+    GoogleSignInAuthentication? googleAuth = await googleUsers?.authentication;
+
+    if (googleAuth == null) return;
+
+    try {
+      final LoginResponse loginResponse = await AuthService.loginGoogleAccount(
+        idToken: googleAuth.idToken!,
+      );
+
+      await StorageService.set<String>(
+          StorageKeys.userToken, loginResponse.token);
+
+      ref.read(authProvider.notifier).getUser();
+      await ref.read(authProvider.notifier).getDevice();
+
       setRemember();
 
       ref.read(authProvider.notifier).initAutoLogout();

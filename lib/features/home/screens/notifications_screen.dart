@@ -41,8 +41,6 @@ class NotificationScreen extends ConsumerWidget {
                     if (notification.data!['go'] == '11') {
                       context.push('/fotos');
                     }
-                  } else {
-                    context.push('/push-details/${notification.messageId}');
                   }
                 },
               );
