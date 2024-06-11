@@ -58,7 +58,7 @@ class RegisterViewState extends ConsumerState<RegisterView> {
           ),
           const SizedBox(height: 30),
           InputWydnex(
-            label: 'Usuario',
+            label: 'Usuario o correo',
             value: registerState.user,
             keyboardType: TextInputType.name,
             onChanged: (value) {

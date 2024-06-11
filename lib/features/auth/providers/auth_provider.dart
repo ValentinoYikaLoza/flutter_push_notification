@@ -6,7 +6,6 @@ import 'package:push_app_notification/config/constants/storage_keys.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/features/auth/models/auth_response.dart';
 import 'package:push_app_notification/features/auth/services/auth_service.dart';
-import 'package:push_app_notification/features/home/models/get_devices_model.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
@@ -26,7 +25,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       await StorageService.set<String>(
           StorageKeys.username, response.user.username);
-      await StorageService.set<int>(StorageKeys.userId, response.user.id);
 
       setuser(response.user);
     } on ServiceException catch (e) {
@@ -34,32 +32,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  getDevice() async {
+  addDevice() async {
     final deviceToken =
         await ref.read(notificationsProvider.notifier).getFCMToken();
 
-    final userId = await StorageService.get<int>(StorageKeys.userId);
+    if (deviceToken == null) return;
 
-    if (userId == null || deviceToken == null) return;
-
-    final GetDevicesResponse response = await GetDevicesService.getDevices(
-      userId: userId,
+    final response = await AddDeviceService.addDevice(
+      deviceToken: deviceToken,
     );
-
-    // Check if devices exist
-    if (response.status == 404) {
-      await AddDeviceService.addDevice(
-        userId: userId,
-        deviceToken: deviceToken,
-      );
+    if (response.status == 201) {
       print('nuevo dispositivo registrado');
     } else {
-      for (var device in response.devices!) {
-        if (deviceToken == device.deviceToken) {
-          print('dispositivo ya ha sido registrado');
-          break;
-        }
-      }
+      print('dispositivo ya ha sido registrado');
     }
   }
 

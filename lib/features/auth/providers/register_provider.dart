@@ -88,7 +88,7 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
       ref.read(authProvider.notifier).initAutoLogout();
 
       ref.read(authProvider.notifier).getUser();
-      await ref.read(authProvider.notifier).getDevice();
+      ref.read(authProvider.notifier).addDevice();
       ref.read(notificationsProvider.notifier).getNotifications();
 
       appRouter.go('/home');
@@ -119,7 +119,7 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
           StorageKeys.userToken, loginResponse.token);
 
       ref.read(authProvider.notifier).getUser();
-      await ref.read(authProvider.notifier).getDevice();
+      ref.read(authProvider.notifier).addDevice();
 
       ref.read(authProvider.notifier).initAutoLogout();
 

@@ -30,7 +30,7 @@ class UserScreenState extends ConsumerState<UserScreen> {
     Future.microtask(() {
       setState(() {
         ref.read(authProvider.notifier).getUser();
-        ref.read(authProvider.notifier).getDevice();
+        // ref.read(authProvider.notifier).getDevice();
         ref.read(notificationsProvider.notifier).getNotifications();
       });
     });

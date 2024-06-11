@@ -3,13 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 
-class NotificationScreen extends ConsumerWidget {
+class NotificationScreen extends ConsumerStatefulWidget {
   const NotificationScreen({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context, ref) {
+  NotificationScreenState createState() => NotificationScreenState();
+}
+
+class NotificationScreenState extends ConsumerState<NotificationScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Future.microtask(() {
+      setState(() {
+        ref.read(notificationsProvider.notifier).getNotifications();
+      });
+    });
+  }
+
+  //agregar obtener notificaciones
+  @override
+  Widget build(BuildContext context) {
     final notifications = ref.watch(notificationsProvider);
     return Column(
       children: [

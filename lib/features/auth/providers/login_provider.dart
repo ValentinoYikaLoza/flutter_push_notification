@@ -81,7 +81,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
           StorageKeys.userToken, loginResponse.token);
 
       ref.read(authProvider.notifier).getUser();
-      await ref.read(authProvider.notifier).getDevice();
+      ref.read(authProvider.notifier).addDevice();
       ref.read(notificationsProvider.notifier).getNotifications();
 
       setRemember();
@@ -93,6 +93,8 @@ class LoginNotifier extends StateNotifier<LoginState> {
       SnackbarService.showSnackbar(message: e.message);
     }
   }
+
+  signInWithFacebook() async {}
 
   signInWithGoogle() async {
     // Cerrar sesión antes de iniciar sesión nuevamente
@@ -113,12 +115,11 @@ class LoginNotifier extends StateNotifier<LoginState> {
           StorageKeys.userToken, loginResponse.token);
 
       ref.read(authProvider.notifier).getUser();
-      await ref.read(authProvider.notifier).getDevice();
+      ref.read(authProvider.notifier).addDevice();
 
       setRemember();
 
       ref.read(authProvider.notifier).initAutoLogout();
-
       appRouter.go('/home');
     } on ServiceException catch (e) {
       SnackbarService.showSnackbar(message: e.message);

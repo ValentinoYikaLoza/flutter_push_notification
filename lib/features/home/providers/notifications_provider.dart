@@ -62,12 +62,9 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   void getNotifications() async {
-    final userId = await StorageService.get<int>(StorageKeys.userId);
-
-    if (userId == null) return;
 
     final GetNotificationsResponse response =
-        await GetNotificationsService.getNotifications(userId: userId);
+        await GetNotificationsService.getNotifications();
 
     if (response.notifications == null) return;
 

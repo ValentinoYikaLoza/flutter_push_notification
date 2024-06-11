@@ -62,7 +62,7 @@ class LoginViewState extends ConsumerState<LoginView> {
           ),
           const SizedBox(height: 30),
           InputWydnex(
-            label: 'Usuario',
+            label: 'Usuario o correo',
             value: loginState.user,
             keyboardType: TextInputType.name,
             onChanged: (value) {

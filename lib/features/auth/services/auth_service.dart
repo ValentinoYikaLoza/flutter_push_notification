@@ -5,7 +5,6 @@ import 'package:push_app_notification/config/api/api.dart';
 import 'package:push_app_notification/features/auth/models/login_response.dart';
 import 'package:push_app_notification/features/auth/models/register_response.dart';
 import 'package:push_app_notification/features/home/models/added_element_model.dart';
-import 'package:push_app_notification/features/home/models/get_devices_model.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
 
@@ -25,7 +24,7 @@ class AuthService {
       final dio = Dio();
 
       final response = await dio.post(
-          'https://feed-190-237-17-15.ngrok-free.app/api/register',
+          'https://3464-181-67-60-239.ngrok-free.app/api/register',
           data: form);
       // Verifica el código de estado de la respuesta
       if (response.statusCode == 201) {
@@ -61,7 +60,7 @@ class AuthService {
       final dio = Dio();
 
       final response = await dio.post(
-          'https://feed-190-237-17-15.ngrok-free.app/api/login',
+          'https://3464-181-67-60-239.ngrok-free.app/api/login',
           data: form);
       // Verifica el código de estado de la respuesta
       if (response.statusCode == 200) {
@@ -93,7 +92,7 @@ class AuthService {
       final dio = Dio();
 
       final response = await dio.post(
-          'https://feed-190-237-17-15.ngrok-free.app/api/registerGoogle',
+          'https://3464-181-67-60-239.ngrok-free.app/api/registerGoogle',
           data: form);
       // Verifica el código de estado de la respuesta
       if (response.statusCode == 201) {
@@ -127,7 +126,7 @@ class AuthService {
       final dio = Dio();
 
       final response = await dio.post(
-          'https://feed-190-237-17-15.ngrok-free.app/api/loginGoogle',
+          'https://3464-181-67-60-239.ngrok-free.app/api/loginGoogle',
           data: form);
       // Verifica el código de estado de la respuesta
       if (response.statusCode == 200) {
@@ -191,12 +190,10 @@ class AuthService {
 
 class AddDeviceService {
   static Future<AddedElementResponse> addDevice({
-    required int userId,
     required String deviceToken,
   }) async {
     try {
       Map<String, dynamic> form = {
-        'user_id': userId,
         'device_token': deviceToken
       };
 
@@ -216,36 +213,6 @@ class AddDeviceService {
       String errorMessage = 'Hubo un error en la conexión.';
       if (e.response != null) {
         print(e.response);
-      }
-      throw ServiceException(errorMessage);
-    } catch (e) {
-      throw ServiceException('Algo salió mal: $e');
-    }
-  }
-}
-
-class GetDevicesService {
-  static Future<GetDevicesResponse> getDevices({
-    required int userId,
-  }) async {
-    try {
-      final response = await api.get(
-        '/getDevices/$userId',
-      );
-
-      // Verifica el código de estado de la respuesta
-      if (response.statusCode == 200) {
-        return GetDevicesResponse.fromJson(response.data);
-      } else {
-        throw ServiceException(
-            'Error al obtener los dispositivos: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      String errorMessage = 'Hubo un error en la conexión.';
-      if (e.response != null) {
-        if (e.response!.statusCode == 404) {
-          return GetDevicesResponse.fromJson(e.response!.data);
-        }
       }
       throw ServiceException(errorMessage);
     } catch (e) {

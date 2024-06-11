@@ -6,12 +6,10 @@ import 'package:push_app_notification/features/shared/services/service_exception
 final api = Api();
 
 class GetNotificationsService {
-  static Future<GetNotificationsResponse> getNotifications({
-    required int userId,
-  }) async {
+  static Future<GetNotificationsResponse> getNotifications() async {
     try {
       final response = await api.get(
-        '/getNotifications/$userId',
+        '/getNotifications',
       );
 
       // Verifica el código de estado de la respuesta
@@ -35,4 +33,3 @@ class GetNotificationsService {
     }
   }
 }
-
