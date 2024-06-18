@@ -6,6 +6,8 @@ import 'package:push_app_notification/config/constants/storage_keys.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/features/auth/models/auth_response.dart';
 import 'package:push_app_notification/features/auth/services/auth_service.dart';
+import 'package:push_app_notification/features/auth/services/device_service.dart';
+import 'package:push_app_notification/features/auth/services/user_service.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
@@ -21,7 +23,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   getUser() async {
     try {
-      final AuthResponse response = await AuthService.getUser();
+      final AuthResponse response = await UserService.getUser();
 
       await StorageService.set<String>(
           StorageKeys.username, response.user.username);
@@ -38,9 +40,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (deviceToken == null) return;
 
-    final response = await AddDeviceService.addDevice(
+    final response = await DeviceService.addDevice(
       deviceToken: deviceToken,
     );
+
     if (response.status == 201) {
       print('nuevo dispositivo registrado');
     } else {
@@ -69,6 +72,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   logOut() async {
+    await ref.read(notificationsProvider.notifier).deleteFMCToken();
+
     await StorageService.remove('userToken');
     cancelTimer();
     appRouter.go('/login');

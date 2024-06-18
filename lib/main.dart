@@ -2,12 +2,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:push_app_notification/config/constants/environment.dart';
-import 'package:push_app_notification/config/constants/storage_keys.dart';
 import 'package:push_app_notification/config/local_notifications/local_notifications.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/config/theme/app_theme.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
-import 'package:push_app_notification/features/shared/services/storage_service.dart';
 
 void main() async {
   await Environment.initEnvironment();
@@ -68,12 +66,7 @@ class HandleNotificationInteractionsState
   }
 
   void _handleMessage(RemoteMessage message) async {
-    final userToken = await StorageService.get<String>(StorageKeys.userToken);
-    if (userToken != null || userToken != '') {
-      ref.read(notificationsProvider.notifier).handleRemoteMessage(message);
-    }else{
-      appRouter.go('/');
-    }
+    ref.read(notificationsProvider.notifier).handleRemoteMessage(message);
   }
 
   @override

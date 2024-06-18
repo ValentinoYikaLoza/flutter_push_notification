@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:push_app_notification/config/constants/storage_keys.dart';
@@ -97,6 +98,46 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
     }
   }
 
+  signUpWithFacebook() async {
+    // Cerrar sesión antes de iniciar sesión nuevamente
+    await FacebookAuth.instance.logOut();
+
+    final LoginResult result = await FacebookAuth.instance.login();
+
+    if (result.status == LoginStatus.success) {
+      final AccessToken accessToken = result.accessToken!;
+      // print(accessToken);
+
+      try {
+        // Registrar el usuario con el token de acceso de Facebook
+        await AuthService.registerFacebookAccount(
+            accessToken: accessToken.tokenString);
+
+        // Iniciar sesión con el mismo token de acceso
+        final LoginResponse loginResponse =
+            await AuthService.loginFacebookAccount(
+          accessToken: accessToken.tokenString,
+        );
+
+        await StorageService.set<String>(
+            StorageKeys.userToken, loginResponse.token);
+
+        ref.read(authProvider.notifier).getUser();
+        ref.read(authProvider.notifier).addDevice();
+        ref.read(notificationsProvider.notifier).getNotifications();
+
+        ref.read(authProvider.notifier).initAutoLogout();
+
+        appRouter.go('/home');
+      } on ServiceException catch (e) {
+        SnackbarService.showSnackbar(message: e.message);
+      }
+    } else {
+      SnackbarService.showSnackbar(
+          message: result.message ?? 'Error desconocido');
+    }
+  }
+
   signUpWithGoogle() async {
     // Cerrar sesión antes de iniciar sesión nuevamente
     await GoogleSignIn().signOut();
@@ -120,6 +161,7 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
 
       ref.read(authProvider.notifier).getUser();
       ref.read(authProvider.notifier).addDevice();
+      ref.read(notificationsProvider.notifier).getNotifications();
 
       ref.read(authProvider.notifier).initAutoLogout();
 

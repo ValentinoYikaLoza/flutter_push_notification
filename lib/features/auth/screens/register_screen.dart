@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:push_app_notification/features/auth/providers/register_provider.dart';
@@ -125,9 +124,16 @@ class RegisterViewState extends ConsumerState<RegisterView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const CircleAvatar(
-                backgroundColor: Colors.blue,
-                child: Icon(FontAwesomeIcons.facebook, color: Colors.white),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    ref.read(registerProvider.notifier).signUpWithFacebook();
+                  });
+                },
+                child: const CircleAvatar(
+                  backgroundColor: Colors.blue,
+                  child: Icon(FontAwesomeIcons.facebook, color: Colors.white),
+                ),
               ),
               const CircleAvatar(
                 backgroundColor: Colors.lightBlue,

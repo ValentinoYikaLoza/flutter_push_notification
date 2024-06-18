@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
@@ -129,9 +130,16 @@ class LoginViewState extends ConsumerState<LoginView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const CircleAvatar(
-                backgroundColor: Colors.blue,
-                child: Icon(FontAwesomeIcons.facebook, color: Colors.white),
+              GestureDetector(
+                onTap: (){
+                  setState(() {
+                    ref.read(loginProvider.notifier).signInWithFacebook();
+                  });
+                },
+                child: const CircleAvatar(
+                  backgroundColor: Colors.blue,
+                  child: Icon(FontAwesomeIcons.facebook, color: Colors.white),
+                ),
               ),
               const CircleAvatar(
                 backgroundColor: Colors.lightBlue,

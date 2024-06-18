@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:push_app_notification/config/constants/environment.dart';
 import 'package:push_app_notification/config/constants/storage_keys.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
 
 class Api {
-  final Dio _dioBase = Dio(BaseOptions(baseUrl: 'https://3464-181-67-60-239.ngrok-free.app/api/'));
+  final Dio _dioBase = Dio(BaseOptions(baseUrl: Environment.urlBASE));
 
   InterceptorsWrapper interceptor = InterceptorsWrapper();
 
@@ -43,5 +44,9 @@ class Api {
 
   Future<Response> post(String path, {required Object data}) async {
     return _dioBase.post(path, data: data);
+  }
+
+  Future<Response> delete(String path, {required Object data}) async {
+    return _dioBase.delete(path, data: data);
   }
 }

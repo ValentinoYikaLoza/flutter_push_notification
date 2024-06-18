@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/features/auth/screens/login_screen.dart';
 import 'package:push_app_notification/features/auth/screens/register_screen.dart';
+import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
 import 'package:push_app_notification/features/shared/widgets/custom_auth_bottom_bar.dart';
 
 class LoginRegisterScreen extends ConsumerStatefulWidget {
@@ -25,6 +26,10 @@ class LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
     super.initState();
     _selectedIndex = widget.index;
     _pageController = PageController(initialPage: _selectedIndex);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notificationsProvider.notifier).deleteFMCToken();
+    });
   }
 
   void _onPageChanged(int index) {

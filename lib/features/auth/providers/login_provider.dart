@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:push_app_notification/config/constants/storage_keys.dart';
@@ -60,6 +61,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
   }
 
   login() async {
+    //PONER EL LOGOUT DE FIREBASE
     FocusManager.instance.primaryFocus
         ?.unfocus(); //hacer que el teclado se quite
 
@@ -94,7 +96,42 @@ class LoginNotifier extends StateNotifier<LoginState> {
     }
   }
 
-  signInWithFacebook() async {}
+  signInWithFacebook() async {
+    // Cerrar sesión antes de iniciar sesión nuevamente
+    await FacebookAuth.instance.logOut();
+
+    final LoginResult result = await FacebookAuth.instance.login(
+      permissions: const ['email', 'public_profile'],
+    );
+
+    if (result.status == LoginStatus.success) {
+      final AccessToken accessToken = result.accessToken!;
+      print(accessToken.tokenString);
+
+      try {
+        final LoginResponse loginResponse =
+            await AuthService.loginFacebookAccount(
+          accessToken: accessToken.tokenString,
+        );
+
+        await StorageService.set<String>(
+            StorageKeys.userToken, loginResponse.token);
+
+        ref.read(authProvider.notifier).getUser();
+        ref.read(authProvider.notifier).addDevice();
+        ref.read(notificationsProvider.notifier).getNotifications();
+
+        ref.read(authProvider.notifier).initAutoLogout();
+
+        appRouter.go('/home');
+      } on ServiceException catch (e) {
+        SnackbarService.showSnackbar(message: e.message);
+      }
+    } else {
+      SnackbarService.showSnackbar(
+          message: result.message ?? 'Error desconocido');
+    }
+  }
 
   signInWithGoogle() async {
     // Cerrar sesión antes de iniciar sesión nuevamente
@@ -116,8 +153,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
       ref.read(authProvider.notifier).getUser();
       ref.read(authProvider.notifier).addDevice();
-
-      setRemember();
+      ref.read(notificationsProvider.notifier).getNotifications();
 
       ref.read(authProvider.notifier).initAutoLogout();
       appRouter.go('/home');

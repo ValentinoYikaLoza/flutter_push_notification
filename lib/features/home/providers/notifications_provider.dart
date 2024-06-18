@@ -1,12 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:push_app_notification/config/constants/storage_keys.dart';
 import 'package:push_app_notification/config/local_notifications/local_notifications.dart';
 import 'package:push_app_notification/features/home/models/get_notifications_model.dart';
 import 'package:push_app_notification/features/home/models/push_message.dart';
 import 'package:push_app_notification/features/home/services/get_notifications_service.dart';
-import 'package:push_app_notification/features/shared/services/storage_service.dart';
 import 'package:push_app_notification/firebase_options.dart';
 
 // Proveedor de Riverpod
@@ -41,6 +39,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     state = state.copyWith(status: status);
   }
 
+  deleteFMCToken() async {
+    await messaging.deleteToken();
+  }
+
   getFCMToken() async {
     final deviceToken = await messaging.getToken();
 
@@ -48,7 +50,6 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   void handleRemoteMessage(RemoteMessage message) async {
-    
     if (message.notification == null) return;
 
     LocalNotifications.showLocalNotification(
@@ -62,7 +63,6 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   void getNotifications() async {
-
     final GetNotificationsResponse response =
         await GetNotificationsService.getNotifications();
 
@@ -74,11 +74,8 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   void onForegroundMessage() async {
-    final userToken = await StorageService.get<String>(StorageKeys.userToken);
-    if (userToken != null || userToken == '') {
-      FirebaseMessaging.onMessage.listen(handleRemoteMessage);
-      getNotifications();
-    }
+    FirebaseMessaging.onMessage.listen(handleRemoteMessage);
+    getNotifications();
   }
 
   Future<void> requestPermission() async {
