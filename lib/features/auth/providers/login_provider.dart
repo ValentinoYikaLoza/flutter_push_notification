@@ -9,6 +9,7 @@ import 'package:push_app_notification/features/auth/models/login_response.dart';
 import 'package:push_app_notification/features/auth/providers/auth_provider.dart';
 import 'package:push_app_notification/features/auth/services/auth_service.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
+import 'package:push_app_notification/features/shared/providers/loader_provider.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/snackbar_service.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
@@ -74,6 +75,8 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
     if (!state.isFormValid) return;
 
+    ref.read(loaderProvider.notifier).mostrarLoader();
+
     try {
       final LoginResponse loginResponse = await AuthService.login(
         user: state.user.value.toLowerCase(),
@@ -94,6 +97,8 @@ class LoginNotifier extends StateNotifier<LoginState> {
     } on ServiceException catch (e) {
       SnackbarService.showSnackbar(message: e.message);
     }
+
+    ref.read(loaderProvider.notifier).quitarLoader();
   }
 
   signInWithFacebook() async {
@@ -107,6 +112,8 @@ class LoginNotifier extends StateNotifier<LoginState> {
     if (result.status == LoginStatus.success) {
       final AccessToken accessToken = result.accessToken!;
       print(accessToken.tokenString);
+
+      ref.read(loaderProvider.notifier).mostrarLoader();
 
       try {
         final LoginResponse loginResponse =
@@ -127,6 +134,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
       } on ServiceException catch (e) {
         SnackbarService.showSnackbar(message: e.message);
       }
+      ref.read(loaderProvider.notifier).quitarLoader();
     } else {
       SnackbarService.showSnackbar(
           message: result.message ?? 'Error desconocido');
@@ -142,6 +150,8 @@ class LoginNotifier extends StateNotifier<LoginState> {
     GoogleSignInAuthentication? googleAuth = await googleUsers?.authentication;
 
     if (googleAuth == null) return;
+
+    ref.read(loaderProvider.notifier).mostrarLoader();
 
     try {
       final LoginResponse loginResponse = await AuthService.loginGoogleAccount(
@@ -160,6 +170,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
     } on ServiceException catch (e) {
       SnackbarService.showSnackbar(message: e.message);
     }
+    ref.read(loaderProvider.notifier).quitarLoader();
   }
 
   setRemember() async {

@@ -9,6 +9,7 @@ import 'package:push_app_notification/features/auth/models/login_response.dart';
 import 'package:push_app_notification/features/auth/providers/auth_provider.dart';
 import 'package:push_app_notification/features/auth/services/auth_service.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
+import 'package:push_app_notification/features/shared/providers/loader_provider.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
 import 'package:push_app_notification/features/shared/services/snackbar_service.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
@@ -71,6 +72,7 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
 
     if (!state.isFormValid) return;
     if (state.password.value != state.repeatedPassword.value) return;
+    ref.read(loaderProvider.notifier).mostrarLoader();
 
     try {
       await AuthService.register(
@@ -96,6 +98,7 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
     } on ServiceException catch (e) {
       SnackbarService.showSnackbar(message: e.message);
     }
+    ref.read(loaderProvider.notifier).quitarLoader();
   }
 
   signUpWithFacebook() async {
@@ -107,6 +110,8 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
     if (result.status == LoginStatus.success) {
       final AccessToken accessToken = result.accessToken!;
       // print(accessToken);
+
+      ref.read(loaderProvider.notifier).mostrarLoader();
 
       try {
         // Registrar el usuario con el token de acceso de Facebook
@@ -132,6 +137,7 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
       } on ServiceException catch (e) {
         SnackbarService.showSnackbar(message: e.message);
       }
+      ref.read(loaderProvider.notifier).quitarLoader();
     } else {
       SnackbarService.showSnackbar(
           message: result.message ?? 'Error desconocido');
@@ -148,6 +154,8 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
     GoogleSignInAuthentication? googleAuth = await googleUsers?.authentication;
 
     if (googleAuth == null) return;
+
+    ref.read(loaderProvider.notifier).mostrarLoader();
 
     try {
       await AuthService.registerGoogleAccount(idToken: googleAuth.idToken!);
@@ -169,6 +177,7 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
     } on ServiceException catch (e) {
       SnackbarService.showSnackbar(message: e.message);
     }
+    ref.read(loaderProvider.notifier).quitarLoader();
   }
 
   changeUser(FormWydnex<String> user) {

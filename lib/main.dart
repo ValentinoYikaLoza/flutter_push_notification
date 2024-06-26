@@ -6,6 +6,7 @@ import 'package:push_app_notification/config/local_notifications/local_notificat
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/config/theme/app_theme.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
+import 'package:push_app_notification/features/shared/widgets/services.dart';
 
 void main() async {
   await Environment.initEnvironment();
@@ -35,12 +36,14 @@ class MainAppState extends ConsumerState<MainApp> {
   // }
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: appRouter,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme().getTheme(),
-      builder: (context, child) =>
-          HandleNotificationInteractions(child: child!),
+    return Services(
+      child: MaterialApp.router(
+          routerConfig: appRouter,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme().getTheme(),
+          builder: (context, child) {
+            return HandleNotificationInteractions(child: child!);
+          }),
     );
   }
 }

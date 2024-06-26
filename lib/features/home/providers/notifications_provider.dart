@@ -5,6 +5,7 @@ import 'package:push_app_notification/config/local_notifications/local_notificat
 import 'package:push_app_notification/features/home/models/get_notifications_model.dart';
 import 'package:push_app_notification/features/home/models/push_message.dart';
 import 'package:push_app_notification/features/home/services/get_notifications_service.dart';
+import 'package:push_app_notification/features/shared/providers/loader_provider.dart';
 import 'package:push_app_notification/firebase_options.dart';
 
 // Proveedor de Riverpod
@@ -63,14 +64,19 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   void getNotifications() async {
+    LoaderNotifier().mostrarLoader();
+
     final GetNotificationsResponse response =
         await GetNotificationsService.getNotifications();
+    
+    LoaderNotifier().quitarLoader();
 
     if (response.notifications == null) return;
 
     state = state.copyWith(
       notifications: response.notifications,
     );
+
   }
 
   void onForegroundMessage() async {

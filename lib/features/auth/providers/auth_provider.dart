@@ -9,7 +9,9 @@ import 'package:push_app_notification/features/auth/services/auth_service.dart';
 import 'package:push_app_notification/features/auth/services/device_service.dart';
 import 'package:push_app_notification/features/auth/services/user_service.dart';
 import 'package:push_app_notification/features/home/providers/notifications_provider.dart';
+import 'package:push_app_notification/features/shared/providers/loader_provider.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
+import 'package:push_app_notification/features/shared/services/snackbar_service.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
 
 //hace la verificación del token
@@ -22,6 +24,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final StateNotifierProviderRef ref;
 
   getUser() async {
+    ref.read(loaderProvider.notifier).mostrarLoader();
+
     try {
       final AuthResponse response = await UserService.getUser();
 
@@ -30,8 +34,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       setuser(response.user);
     } on ServiceException catch (e) {
-      throw ServiceException(e.message);
+      SnackbarService.showSnackbar(message: e.message);
     }
+    ref.read(loaderProvider.notifier).quitarLoader();
   }
 
   addDevice() async {
@@ -40,15 +45,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (deviceToken == null) return;
 
-    final response = await DeviceService.addDevice(
-      deviceToken: deviceToken,
-    );
+    ref.read(loaderProvider.notifier).mostrarLoader();
+    try {
+      final response = await DeviceService.addDevice(
+        deviceToken: deviceToken,
+      );
 
-    if (response.status == 201) {
-      print('nuevo dispositivo registrado');
-    } else {
-      print('dispositivo ya ha sido registrado');
+      if (response.status == 201) {
+        print('nuevo dispositivo registrado');
+      } else {
+        print('dispositivo ya ha sido registrado');
+      }
+    } on ServiceException catch (e) {
+      SnackbarService.showSnackbar(message: e.message);
     }
+    ref.read(loaderProvider.notifier).quitarLoader();
   }
 
   setuser(User? user) {
