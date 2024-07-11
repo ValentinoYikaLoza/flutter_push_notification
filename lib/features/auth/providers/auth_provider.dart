@@ -1,7 +1,6 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:push_app_notification/config/constants/storage_keys.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/features/auth/models/auth_response.dart';
@@ -31,6 +30,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       await StorageService.set<String>(
           StorageKeys.username, response.user.username);
+
+      state = state.copyWith(
+        fingerprintEnabled: response.hasFingerprintToken,
+      );
 
       setuser(response.user);
     } on ServiceException catch (e) {
@@ -62,9 +65,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     ref.read(loaderProvider.notifier).quitarLoader();
   }
 
-  setuser(User? user) {
+  setuser(User user) {
     state = state.copyWith(
-      user: () => user,
+      username: user.username,
+      userId: user.id,
     );
   }
 
@@ -99,16 +103,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 //Modelo o entidad de AuthState
 class AuthState {
-  final User? user;
+  final String username;
+  final int userId;
+  final bool fingerprintEnabled;
 
   AuthState({
-    this.user,
+    this.username = '',
+    this.userId = 0,
+    this.fingerprintEnabled = false,
   });
 
   AuthState copyWith({
-    ValueGetter<User?>? user,
-  }) =>
-      AuthState(
-        user: user != null ? user() : this.user,
-      );
+    String? username,
+    int? userId,
+    bool? fingerprintEnabled,
+  }) {
+    return AuthState(
+      username: username ?? this.username,
+      userId: userId ?? this.userId,
+      fingerprintEnabled: fingerprintEnabled ?? this.fingerprintEnabled,
+    );
+  }
 }

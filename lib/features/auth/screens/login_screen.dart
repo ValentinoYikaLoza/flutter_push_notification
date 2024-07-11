@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:push_app_notification/config/router/app_router.dart';
 import 'package:push_app_notification/features/auth/providers/login_provider.dart';
 import 'package:push_app_notification/features/auth/widgets/password_input.dart';
+import 'package:push_app_notification/features/auth/widgets/users_dialog.dart';
 import 'package:push_app_notification/features/shared/widgets/checkbox.dart';
 import 'package:push_app_notification/features/shared/widgets/custom_filled_button.dart';
 import 'package:push_app_notification/features/shared/widgets/input_wydnex.dart';
@@ -34,6 +35,15 @@ class LoginViewState extends ConsumerState<LoginView> {
     Future.microtask(() {
       ref.read(loginProvider.notifier).initData();
     });
+  }
+
+  void openDialogUsers(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const UsersDialog();
+      },
+    );
   }
 
   @override
@@ -87,18 +97,41 @@ class LoginViewState extends ConsumerState<LoginView> {
             label: 'Recuerdame',
           ),
           const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 60,
-            child: CustomFilledButton(
-              buttonColor: Colors.blue,
-              textColor: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              child: const Text('Ingresar'),
-              onPressed: () {
-                ref.read(loginProvider.notifier).login();
-              },
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: CustomFilledButton(
+                    buttonColor: Colors.blue,
+                    textColor: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    child: const Text('Ingresar'),
+                    onPressed: () {
+                      ref.read(loginProvider.notifier).signIn();
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 60,
+                child: CustomFilledButton(
+                  buttonColor: Colors.blue,
+                  textColor: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  child: const Icon(FontAwesomeIcons.fingerprint),
+                  onPressed: () async {
+                    await ref.read(loginProvider.notifier).authenticateFingerprint();
+                    if (loginState.fingerprintEnabled) {
+                      openDialogUsers(context);
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 15),
           Row(
@@ -131,7 +164,7 @@ class LoginViewState extends ConsumerState<LoginView> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   setState(() {
                     ref.read(loginProvider.notifier).signInWithFacebook();
                   });

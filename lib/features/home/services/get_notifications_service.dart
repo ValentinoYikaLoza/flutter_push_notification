@@ -14,7 +14,7 @@ class GetNotificationsService {
 
       // Verifica el código de estado de la respuesta
       if (response.statusCode == 200) {
-        print(response.data);
+        // print(response.data);
         return GetNotificationsResponse.fromJson(response.data);
       } else {
         throw ServiceException(

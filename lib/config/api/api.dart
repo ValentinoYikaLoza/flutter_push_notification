@@ -24,7 +24,7 @@ class Api {
           // print('> Headers: ${options.headers}');
           handler.next(options);
         } catch (e) {
-          print('> Error in interceptor: $e');
+          // print('> Error in interceptor: $e');
           handler.reject(DioException(
             requestOptions: options,
             error: e,

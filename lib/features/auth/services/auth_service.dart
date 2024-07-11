@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:push_app_notification/config/constants/environment.dart';
+import 'package:push_app_notification/features/auth/models/fingerprint_users_response.dart';
 import 'package:push_app_notification/features/auth/models/login_response.dart';
 import 'package:push_app_notification/features/auth/models/register_response.dart';
 import 'package:push_app_notification/features/shared/services/service_exception.dart';
@@ -182,6 +183,36 @@ class AuthService {
     }
   }
 
+  static Future<LoginResponse> loginWithFingerprint({
+    required String username,
+    required String deviceInfoToken,
+  }) async {
+    try {
+      Map<String, dynamic> form = {
+        'username': username,
+        'device_info_token': deviceInfoToken
+      };
+
+      final response = await dio.post('/loginWithFingerprint', data: form);
+      // Verifica el código de estado de la respuesta
+      if (response.statusCode == 200) {
+        return LoginResponse.fromJson(response.data);
+      } else {
+        throw ServiceException('Usuario o contraseña incorrecta');
+      }
+    } on DioException catch (e) {
+      String errorMessage = '';
+      if (e.response?.statusCode == 401) {
+        errorMessage = 'Usuario no encontrado';
+      } else {
+        errorMessage = 'La huella digital no está habilitada para este usuario';
+      }
+      throw ServiceException(errorMessage);
+    } catch (e) {
+      throw ServiceException('Algo salió mal.');
+    }
+  }
+
   //JSON WEB TOKENS
   static Future<(bool, int)> verifyToken() async {
     final userToken = await StorageService.get<String>('userToken');
@@ -203,5 +234,22 @@ class AuthService {
     }
     return (true, timeRemainingInSeconds);
   }
-}
 
+  static Future<FingerprintUsersResponse> getUsersWithFingerprintToken({
+    required String deviceInfoToken,
+  }) async {
+    try {
+      Map<String, dynamic> form = {'device_info_token': deviceInfoToken};
+      final response = await dio.get('/usersWithFingerprintToken', data: form);
+
+      // Verifica el código de estado de la respuesta
+      if (response.statusCode == 200) {
+        return FingerprintUsersResponse.fromJson(response.data);
+      } else {
+        throw ServiceException('Usuarios no encontrados');
+      }
+    } catch (e) {
+      throw ServiceException('Algo salió mal. $e');
+    }
+  }
+}

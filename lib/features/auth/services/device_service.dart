@@ -28,7 +28,7 @@ class DeviceService {
     } on DioException catch (e) {
       String errorMessage = 'Hubo un error en la conexión.';
       if (e.response != null) {
-        print(e.response);
+        // print(e.response);
       }
       throw ServiceException(errorMessage);
     } catch (e) {

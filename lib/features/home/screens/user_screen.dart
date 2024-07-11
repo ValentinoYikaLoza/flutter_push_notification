@@ -83,7 +83,7 @@ class UserScreenState extends ConsumerState<UserScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider);
 
-    final String username = nameFormatter(user.user?.username.toString());
+    final String username = nameFormatter(user.username.toString());
     
     return Scaffold(
         appBar: AppBar(
