@@ -15,7 +15,7 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
   final StateNotifierProviderRef ref;
 
   checkBiometricSupport() async {
-    final canAuthenticate = await  BiometricStorage().canAuthenticate();
+    final canAuthenticate = await BiometricStorage().canAuthenticate();
     print('Biometrics: $canAuthenticate');
     if (canAuthenticate != CanAuthenticateResponse.success) {
       state = state.copyWith(
@@ -34,19 +34,14 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
 
   storeData(String key, String data, [bool authRequired = true]) async {
     try {
-      final storageFile = await BiometricStorage().getStorage(
-        key,
-        options: StorageFileInitOptions(authenticationRequired: authRequired),
-      );
+      final storageFile = await BiometricStorage().getStorage(key,
+          promptInfo: const PromptInfo(
+              androidPromptInfo:
+                  AndroidPromptInfo(title: 'Authenticate to store data'),
+              iosPromptInfo:
+                  IosPromptInfo(saveTitle: 'Authenticate to store data')));
       print('Comenzó');
-      await storageFile.write(
-        data,
-        promptInfo: const PromptInfo(
-          androidPromptInfo:
-              AndroidPromptInfo(title: 'Authenticate to store data'),
-          iosPromptInfo: IosPromptInfo(saveTitle: 'Authenticate to store data'),
-        ),
-      );
+      await storageFile.write(data);
       print('Finalizó');
     } on BiometricStorageException catch (e) {
       SnackbarService.showSnackbar(message: e.message);
@@ -60,10 +55,8 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
       final storageFile = await BiometricStorage().getStorage(
         key,
         promptInfo: const PromptInfo(
-          androidPromptInfo:
-              AndroidPromptInfo(title: 'Authenticate to access'),
-          iosPromptInfo:
-              IosPromptInfo(saveTitle: 'Authenticate to access'),
+          androidPromptInfo: AndroidPromptInfo(title: 'Authenticate to access'),
+          iosPromptInfo: IosPromptInfo(saveTitle: 'Authenticate to access'),
         ),
       );
       final String? data = await storageFile.read();

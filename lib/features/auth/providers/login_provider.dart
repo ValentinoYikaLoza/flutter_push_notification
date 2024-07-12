@@ -184,18 +184,6 @@ class LoginNotifier extends StateNotifier<LoginState> {
     ref.read(loaderProvider.notifier).quitarLoader();
   }
 
-  prueba() async {
-    await ref
-        .read(biometricStorageProvider.notifier)
-        .storeData('deviceInfo', 'gato');
-  }
-
-  prueba2() async {
-    await ref
-        .read(biometricStorageProvider.notifier)
-        .readData('deviceInfo');
-  }
-
   signInWithFingerprint(String username) async {
     final deviceInfo = await ref
         .read(biometricStorageProvider.notifier)
@@ -316,7 +304,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
           }
           ref.read(loaderProvider.notifier).quitarLoader();
         } else {
-          print('No se pudo obtener la información del dispositivo.');
+          SnackbarService.showSnackbar(message: 'Se ha detectado un cambio en los datos biométricos, vuelva ingresar para agregar nueva huella');
         }
       } else {
         SnackbarService.showSnackbar(message: 'No autenticado');

@@ -8,7 +8,6 @@ environment:
 
 dependencies:
   biometric_storage: ^5.0.1
-  device_info_plus: ^10.1.0
   device_uuid: ^0.0.4
   dio: ^5.4.3+1
   firebase_auth: ^4.20.0

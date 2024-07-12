@@ -78,21 +78,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                   setState(() {
                     ref
                         .read(loginProvider.notifier)
-                        .prueba();
-                  });
-                },
-              ),
-              const SizedBox(width: 10),
-              CustomFilledButton(
-                buttonColor: Colors.transparent,
-                textColor: Colors.blue,
-                borderRadius: BorderRadius.circular(20),
-                child: const Icon(FontAwesomeIcons.fingerprint),
-                onPressed: () {
-                  setState(() {
-                    ref
-                        .read(loginProvider.notifier)
-                        .prueba2();
+                        .toggleFingerprint();
                   });
                 },
               ),
