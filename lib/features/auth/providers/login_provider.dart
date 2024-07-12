@@ -185,9 +185,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
   }
 
   signInWithFingerprint(String username) async {
-    final deviceInfo = await ref
-        .read(biometricStorageProvider.notifier)
-        .readData('deviceInfo');
+    final deviceInfo = await generateDeviceInfo();
     if (deviceInfo != null) {
       print('Dispositivo: $deviceInfo');
       final deviceInfoToken = uuid.v5(Uuid.NAMESPACE_URL, deviceInfo);
@@ -216,7 +214,9 @@ class LoginNotifier extends StateNotifier<LoginState> {
       }
       ref.read(loaderProvider.notifier).quitarLoader();
     } else {
-      print('No se pudo obtener la información del dispositivo.');
+      SnackbarService.showSnackbar(
+          message:
+              'Huella no registrada, ingresa para registrar la nueva huella');
     }
   }
 
@@ -229,10 +229,12 @@ class LoginNotifier extends StateNotifier<LoginState> {
         ref
             .read(biometricStorageProvider.notifier)
             .storeData('deviceInfo', 'Android-$deviceId');
+        return 'Android-$deviceId';
       } else if (Platform.isIOS) {
         ref
             .read(biometricStorageProvider.notifier)
             .storeData('deviceInfo', 'iOS-$deviceId');
+        return 'iOS-$deviceId';
       } else {
         throw UnsupportedError('Platform not supported');
       }
@@ -247,45 +249,50 @@ class LoginNotifier extends StateNotifier<LoginState> {
     final bool canAuthenticate = storage.canAuthenticate;
     try {
       if (canAuthenticate) {
-        await generateDeviceInfo();
-        final deviceInfo = await ref
-            .read(biometricStorageProvider.notifier)
-            .readData('deviceInfo');
+        final deviceInfo = await ref.read(biometricStorageProvider.notifier).readData('deviceInfo');
         if (deviceInfo != null) {
-          print('Dispositivo: $deviceInfo');
           final deviceInfoToken = uuid.v5(Uuid.NAMESPACE_URL, deviceInfo);
-          print('Dispositivo encriptado: $deviceInfoToken');
-
           ref.read(loaderProvider.notifier).mostrarLoader();
           try {
             await UserService.toggleFingerprint(
               deviceInfoToken: deviceInfoToken,
             );
-            ref.read(authProvider.notifier).getUser();
+            await ref.read(authProvider.notifier).getUser();
             ref.read(loaderProvider.notifier).quitarLoader();
           } on ServiceException catch (e) {
             SnackbarService.showSnackbar(message: e.message);
           }
           ref.read(loaderProvider.notifier).quitarLoader();
         } else {
-          print('No se pudo obtener la información del dispositivo.');
+          SnackbarService.showSnackbar(
+              message:
+                  'Huella no registrada, ingresa para registrar la nueva huella');
         }
+      } else {
+        SnackbarService.showSnackbar(
+            message: 'La autenticación biométrica no está disponible.');
       }
     } on PlatformException catch (e) {
       SnackbarService.showSnackbar(message: 'Error: ${e.message}');
+    } catch (e) {
+      SnackbarService.showSnackbar(message: 'Autenticación cancelada o fallida: $e');
     }
   }
 
   authenticateFingerprint() async {
     final storage = ref.watch(biometricStorageProvider);
     try {
-      final bool didAuthenticate = storage.canAuthenticate;
-      if (didAuthenticate) {
+      final bool canAuthenticate = storage.canAuthenticate;
+      if (canAuthenticate) {
         final deviceInfo = await ref
             .read(biometricStorageProvider.notifier)
             .readData('deviceInfo');
+        state = state.copyWith(
+          fingerprintEnabled: deviceInfo != null,
+        );
         if (deviceInfo != null) {
           print('Dispositivo: $deviceInfo');
+          print('Fingerprint enabled: ${state.fingerprintEnabled}');
           final deviceInfoToken = uuid.v5(Uuid.NAMESPACE_URL, deviceInfo);
           print('Dispositivo encriptado: $deviceInfoToken');
           ref.read(loaderProvider.notifier).mostrarLoader();
@@ -294,9 +301,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
                 await AuthService.getUsersWithFingerprintToken(
               deviceInfoToken: deviceInfoToken,
             );
-
             state = state.copyWith(
-              fingerprintEnabled: didAuthenticate,
               users: response.users,
             );
           } on ServiceException catch (e) {
@@ -304,7 +309,9 @@ class LoginNotifier extends StateNotifier<LoginState> {
           }
           ref.read(loaderProvider.notifier).quitarLoader();
         } else {
-          SnackbarService.showSnackbar(message: 'Se ha detectado un cambio en los datos biométricos, vuelva ingresar para agregar nueva huella');
+          SnackbarService.showSnackbar(
+              message:
+                  'Huella no registrada, ingresa para registrar la nueva huella');
         }
       } else {
         SnackbarService.showSnackbar(message: 'No autenticado');

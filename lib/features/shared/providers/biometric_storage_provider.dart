@@ -32,14 +32,15 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
     }
   }
 
-  storeData(String key, String data, [bool authRequired = true]) async {
+  storeData(String key, String data) async {
     try {
       final storageFile = await BiometricStorage().getStorage(key,
           promptInfo: const PromptInfo(
               androidPromptInfo:
                   AndroidPromptInfo(title: 'Authenticate to store data'),
               iosPromptInfo:
-                  IosPromptInfo(saveTitle: 'Authenticate to store data')));
+                  IosPromptInfo(saveTitle: 'Authenticate to store data')),
+          options: StorageFileInitOptions(authenticationRequired: false));
       print('Comenzó');
       await storageFile.write(data);
       print('Finalizó');
@@ -50,14 +51,15 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
     }
   }
 
-  readData(String key, [bool authRequired = true]) async {
+  readData(String key) async {
     try {
       final storageFile = await BiometricStorage().getStorage(
         key,
         promptInfo: const PromptInfo(
-          androidPromptInfo: AndroidPromptInfo(title: 'Authenticate to access'),
-          iosPromptInfo: IosPromptInfo(saveTitle: 'Authenticate to access'),
-        ),
+            androidPromptInfo:
+                AndroidPromptInfo(title: 'Authenticate to store data'),
+            iosPromptInfo:
+                IosPromptInfo(saveTitle: 'Authenticate to store data')),
       );
       final String? data = await storageFile.read();
       print('data: $data');
@@ -71,10 +73,14 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
 
   deleteData(String key, [bool authRequired = true]) async {
     try {
-      final storageFile = await BiometricStorage().getStorage(
-        key,
-        options: StorageFileInitOptions(authenticationRequired: authRequired),
-      );
+      final storageFile = await BiometricStorage().getStorage(key,
+          promptInfo: const PromptInfo(
+              androidPromptInfo:
+                  AndroidPromptInfo(title: 'Authenticate to store data'),
+              iosPromptInfo:
+                  IosPromptInfo(saveTitle: 'Authenticate to store data')),
+          options:
+              StorageFileInitOptions(authenticationRequired: authRequired));
       await storageFile.delete(
         promptInfo: const PromptInfo(
           androidPromptInfo:

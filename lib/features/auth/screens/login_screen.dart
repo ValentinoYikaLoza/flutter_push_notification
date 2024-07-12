@@ -37,13 +37,16 @@ class LoginViewState extends ConsumerState<LoginView> {
     });
   }
 
-  void openDialogUsers(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return const UsersDialog();
-      },
-    );
+  void openDialogUsers(BuildContext context) async {
+    await ref.read(loginProvider.notifier).authenticateFingerprint();
+    setState(() {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return const UsersDialog();
+        },
+      );
+    });
   }
 
   @override
@@ -123,11 +126,8 @@ class LoginViewState extends ConsumerState<LoginView> {
                   textColor: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   child: const Icon(FontAwesomeIcons.fingerprint),
-                  onPressed: () async {
-                    await ref.read(loginProvider.notifier).authenticateFingerprint();
-                    if (loginState.fingerprintEnabled) {
-                      openDialogUsers(context);
-                    }
+                  onPressed: () {
+                    openDialogUsers(context);
                   },
                 ),
               ),

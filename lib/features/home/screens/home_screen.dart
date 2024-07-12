@@ -25,7 +25,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     final isFingerprintToken = user.fingerprintEnabled;
     if (isFingerprintToken) {
       iconColor = Colors.red;
-    }else{
+    } else {
       iconColor = Colors.black;
     }
 
@@ -76,9 +76,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                 child: const Icon(FontAwesomeIcons.fingerprint),
                 onPressed: () {
                   setState(() {
-                    ref
-                        .read(loginProvider.notifier)
-                        .toggleFingerprint();
+                    ref.read(loginProvider.notifier).toggleFingerprint();
                   });
                 },
               ),
