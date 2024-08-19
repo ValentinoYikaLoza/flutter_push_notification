@@ -25,31 +25,37 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
+  // Inicializa Firebase Cloud Messaging (FCM)
   static Future<void> initializeFCM() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
 
+  // Verifica el estado inicial de las notificaciones
   Future<void> initialStatusCheck() async {
     final settings = await messaging.getNotificationSettings();
     _notificationStatusChanged(settings.authorizationStatus);
   }
 
+  // Actualiza el estado de autorización de notificaciones
   void _notificationStatusChanged(AuthorizationStatus status) {
     state = state.copyWith(status: status);
   }
 
+  // Elimina el token de FCM
   deleteFMCToken() async {
     await messaging.deleteToken();
   }
 
+  // Obtiene el token de FCM
   getFCMToken() async {
     final deviceToken = await messaging.getToken();
 
     return deviceToken;
   }
 
+  // Maneja mensajes remotos
   void handleRemoteMessage(RemoteMessage message) async {
     if (message.notification == null) return;
 
@@ -63,6 +69,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     getNotifications();
   }
 
+  // Obtiene las notificaciones
   void getNotifications() async {
     LoaderNotifier().mostrarLoader();
 
@@ -79,11 +86,13 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 
   }
 
+  // Escucha mensajes en primer plano
   void onForegroundMessage() async {
     FirebaseMessaging.onMessage.listen(handleRemoteMessage);
     getNotifications();
   }
 
+  // Solicita permiso para las notificaciones
   Future<void> requestPermission() async {
     NotificationSettings settings = await messaging.requestPermission(
       alert: true,
@@ -121,7 +130,7 @@ class NotificationsState {
       );
 }
 
-// Handler para mensajes en background
+// Manejador para mensajes en background
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }

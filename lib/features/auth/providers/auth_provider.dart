@@ -13,15 +13,17 @@ import 'package:push_app_notification/features/shared/services/service_exception
 import 'package:push_app_notification/features/shared/services/snackbar_service.dart';
 import 'package:push_app_notification/features/shared/services/storage_service.dart';
 
-//hace la verificación del token
+// Proveedor de estado para la autenticación
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(ref);
 });
 
+// Clase que maneja el estado y las acciones de autenticación
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier(this.ref) : super(AuthState());
   final StateNotifierProviderRef ref;
 
+  // Método para obtener el usuario autenticado
   getUser() async {
     ref.read(loaderProvider.notifier).mostrarLoader();
 
@@ -42,6 +44,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     ref.read(loaderProvider.notifier).quitarLoader();
   }
 
+  // Método para añadir un dispositivo
   addDevice() async {
     final deviceToken =
         await ref.read(notificationsProvider.notifier).getFCMToken();
@@ -65,6 +68,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     ref.read(loaderProvider.notifier).quitarLoader();
   }
 
+  // Método para establecer el usuario en el estado
   setuser(User user) {
     state = state.copyWith(
       username: user.username,
@@ -72,8 +76,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Timer? timer;
+  Timer? timer; // Temporizador para el cierre de sesión automático
 
+  // Inicializar el cierre de sesión automático
   initAutoLogout() async {
     cancelTimer();
     final (validToken, timeRemainingInSeconds) =
@@ -86,6 +91,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  // Método para cerrar sesión
   logOut() async {
     await ref.read(notificationsProvider.notifier).deleteFMCToken();
 
@@ -94,6 +100,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     appRouter.go('/login');
   }
 
+  // Método para cancelar el temporizador
   cancelTimer() {
     if (timer != null) {
       timer!.cancel();
@@ -113,6 +120,7 @@ class AuthState {
     this.fingerprintEnabled = false,
   });
 
+  // Método para copiar el estado y actualizar valores específicos
   AuthState copyWith({
     String? username,
     int? userId,

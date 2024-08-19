@@ -3,17 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:push_app_notification/features/shared/services/snackbar_service.dart';
 
+// Proveedor de estado para el almacenamiento biométrico
 final biometricStorageProvider =
     StateNotifierProvider<BiometricStorageNotifier, BiometricStorageState>(
         (ref) {
   return BiometricStorageNotifier(ref);
 });
 
+// Clase que maneja el estado y las acciones del almacenamiento biométrico
 class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
   BiometricStorageNotifier(this.ref) : super(BiometricStorageState());
 
   final StateNotifierProviderRef ref;
 
+  // Método para verificar el soporte biométrico del dispositivo
   checkBiometricSupport() async {
     final canAuthenticate = await BiometricStorage().canAuthenticate();
     print('Biometrics: $canAuthenticate');
@@ -32,6 +35,7 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
     }
   }
 
+  // Método para almacenar datos biométricos
   storeData(String key, String data) async {
     try {
       final storageFile = await BiometricStorage().getStorage(key,
@@ -51,15 +55,16 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
     }
   }
 
+  // Método para leer datos biométricos
   readData(String key) async {
     try {
       final storageFile = await BiometricStorage().getStorage(
         key,
         promptInfo: const PromptInfo(
             androidPromptInfo:
-                AndroidPromptInfo(title: 'Authenticate to store data'),
+                AndroidPromptInfo(title: 'Authenticate to read data'),
             iosPromptInfo:
-                IosPromptInfo(saveTitle: 'Authenticate to store data')),
+                IosPromptInfo(saveTitle: 'Authenticate to read data')),
       );
       final String? data = await storageFile.read();
       print('data: $data');
@@ -71,24 +76,18 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
     }
   }
 
-  deleteData(String key, [bool authRequired = true]) async {
+  // Método para eliminar datos biométricos
+  deleteData(String key) async {
     try {
       final storageFile = await BiometricStorage().getStorage(key,
           promptInfo: const PromptInfo(
-              androidPromptInfo:
-                  AndroidPromptInfo(title: 'Authenticate to store data'),
-              iosPromptInfo:
-                  IosPromptInfo(saveTitle: 'Authenticate to store data')),
-          options:
-              StorageFileInitOptions(authenticationRequired: authRequired));
-      await storageFile.delete(
-        promptInfo: const PromptInfo(
-          androidPromptInfo:
-              AndroidPromptInfo(title: 'Authenticate to delete data'),
-          iosPromptInfo:
-              IosPromptInfo(saveTitle: 'Authenticate to delete data'),
-        ),
-      );
+            androidPromptInfo:
+                AndroidPromptInfo(title: 'Authenticate to delete data'),
+            iosPromptInfo:
+                IosPromptInfo(saveTitle: 'Authenticate to delete data'),
+          ),
+          options: StorageFileInitOptions(authenticationRequired: true));
+      await storageFile.delete();
     } on BiometricStorageException catch (e) {
       SnackbarService.showSnackbar(message: e.message);
     } catch (e) {
@@ -97,6 +96,7 @@ class BiometricStorageNotifier extends StateNotifier<BiometricStorageState> {
   }
 }
 
+// Modelo o entidad de BiometricStorageState
 class BiometricStorageState {
   final bool canAuthenticate;
   final String message;
@@ -105,6 +105,7 @@ class BiometricStorageState {
     this.message = '',
   });
 
+  // Método para copiar el estado y actualizar valores específicos
   BiometricStorageState copyWith({
     bool? canAuthenticate,
     String? message,

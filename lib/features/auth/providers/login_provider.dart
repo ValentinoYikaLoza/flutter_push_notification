@@ -27,10 +27,12 @@ final loginProvider = StateNotifierProvider<LoginNotifier, LoginState>((ref) {
   return LoginNotifier(ref);
 });
 
+// Clase que maneja el estado y las acciones del login
 class LoginNotifier extends StateNotifier<LoginState> {
   LoginNotifier(this.ref)
       : super(
           LoginState(
+            // Inicialización de los campos del formulario de login
             user: FormWydnex<String>(
               value: '',
               validators: [
@@ -53,11 +55,15 @@ class LoginNotifier extends StateNotifier<LoginState> {
             ),
           ),
         );
-  final StateNotifierProviderRef ref;
-  final LocalAuthentication auth = LocalAuthentication();
-  final Uuid uuid = const Uuid();
-  final DeviceUuid deviceUuid = DeviceUuid();
 
+  final StateNotifierProviderRef ref; // Referencia al proveedor
+  final LocalAuthentication auth =
+      LocalAuthentication(); // Objeto para autenticación local
+  final Uuid uuid = const Uuid(); // Generador de UUIDs
+  final DeviceUuid deviceUuid =
+      DeviceUuid(); // Objeto para obtener el UUID del dispositivo
+
+  // Inicialización de datos
   initData() async {
     final user = await StorageService.get<String>(StorageKeys.username);
     if (user == null) return;
@@ -72,10 +78,9 @@ class LoginNotifier extends StateNotifier<LoginState> {
     );
   }
 
+  // Método para iniciar sesión
   signIn() async {
-    //PONER EL LOGOUT DE FIREBASE
-    FocusManager.instance.primaryFocus
-        ?.unfocus(); //hacer que el teclado se quite
+    FocusManager.instance.primaryFocus?.unfocus();
 
     final user = FormWydnex(value: state.user.value);
     final password = FormWydnex(value: state.password.value);
@@ -112,8 +117,8 @@ class LoginNotifier extends StateNotifier<LoginState> {
     ref.read(loaderProvider.notifier).quitarLoader();
   }
 
+  // Método para iniciar sesión con Facebook
   signInWithFacebook() async {
-    // Cerrar sesión antes de iniciar sesión nuevamente
     await FacebookAuth.instance.logOut();
 
     final LoginResult result = await FacebookAuth.instance.login(
@@ -152,8 +157,8 @@ class LoginNotifier extends StateNotifier<LoginState> {
     }
   }
 
+  // Método para iniciar sesión con Google
   signInWithGoogle() async {
-    // Cerrar sesión antes de iniciar sesión nuevamente
     await GoogleSignIn().signOut();
 
     GoogleSignInAccount? googleUsers = await GoogleSignIn().signIn();
@@ -184,6 +189,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
     ref.read(loaderProvider.notifier).quitarLoader();
   }
 
+  // Método para iniciar sesión con huella dactilar
   signInWithFingerprint(String username) async {
     final deviceInfo = await generateDeviceInfo();
     if (deviceInfo != null) {
@@ -220,6 +226,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
     }
   }
 
+  // Generar información del dispositivo
   generateDeviceInfo() async {
     try {
       DeviceUuid deviceUuid = DeviceUuid();
@@ -244,12 +251,15 @@ class LoginNotifier extends StateNotifier<LoginState> {
     }
   }
 
+  // Alternar estado de la huella dactilar
   toggleFingerprint() async {
     final storage = ref.read(biometricStorageProvider);
     final bool canAuthenticate = storage.canAuthenticate;
     try {
       if (canAuthenticate) {
-        final deviceInfo = await ref.read(biometricStorageProvider.notifier).readData('deviceInfo');
+        final deviceInfo = await ref
+            .read(biometricStorageProvider.notifier)
+            .readData('deviceInfo');
         if (deviceInfo != null) {
           final deviceInfoToken = uuid.v5(Uuid.NAMESPACE_URL, deviceInfo);
           ref.read(loaderProvider.notifier).mostrarLoader();
@@ -275,10 +285,12 @@ class LoginNotifier extends StateNotifier<LoginState> {
     } on PlatformException catch (e) {
       SnackbarService.showSnackbar(message: 'Error: ${e.message}');
     } catch (e) {
-      SnackbarService.showSnackbar(message: 'Autenticación cancelada o fallida: $e');
+      SnackbarService.showSnackbar(
+          message: 'Autenticación cancelada o fallida: $e');
     }
   }
 
+  // Autenticar huella dactilar
   authenticateFingerprint() async {
     final storage = ref.watch(biometricStorageProvider);
     try {
@@ -321,22 +333,26 @@ class LoginNotifier extends StateNotifier<LoginState> {
     }
   }
 
+  // Guardar la preferencia de recordar usuario
   setRemember() async {
     await StorageService.set<bool>(StorageKeys.rememberMe, state.rememberMe);
   }
 
+  // Cambiar el valor del usuario en el formulario
   changeUser(FormWydnex<String> user) {
     state = state.copyWith(
       user: user,
     );
   }
 
+  // Cambiar el valor de la contraseña en el formulario
   changePassword(FormWydnex<String> password) {
     state = state.copyWith(
       password: password,
     );
   }
 
+  // Alternar la preferencia de recordar usuario
   toggleRememberMe() {
     state = state.copyWith(
       rememberMe: !state.rememberMe,
@@ -344,17 +360,18 @@ class LoginNotifier extends StateNotifier<LoginState> {
   }
 }
 
+// Estado del login
 class LoginState {
-  final FormWydnex<String> user;
-  final FormWydnex<String> password;
-  final bool loading;
-  final bool rememberMe;
+  final FormWydnex<String> user; // Campo de usuario del formulario
+  final FormWydnex<String> password; // Campo de contraseña del formulario
+  final bool loading; // Indicador de carga
+  final bool rememberMe; // Preferencia de recordar usuario
   bool get isFormValid {
     return user.isValid && password.isValid;
   }
 
-  final List<User> users;
-  final bool fingerprintEnabled;
+  final List<User> users; // Lista de usuarios
+  final bool fingerprintEnabled; // Indicador de huella dactilar habilitada
 
   LoginState({
     required this.user,
@@ -365,6 +382,7 @@ class LoginState {
     this.fingerprintEnabled = false,
   });
 
+  // Método para copiar el estado y actualizar valores específicos
   LoginState copyWith({
     FormWydnex<String>? user,
     FormWydnex<String>? password,
